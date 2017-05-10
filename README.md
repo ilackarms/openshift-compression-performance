@@ -35,6 +35,20 @@ Swap:       7991292      669440     7321852
 - Created large dataset (50,000 images) using [create_images.sh](scripts/create_images.sh).
 - Requests were sent from a host in Tel-Aviv to Boston, with 580ms ping latency.
 
+**Update**: Connection information between client (TLV) and host (BST):
+
+```
+# iperf -c <host ip>
+------------------------------------------------------------
+Client connecting to 0.tcp.ngrok.io, TCP port 16419
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 10.35.48.68 port 49840 connected with 52.15.183.149 port 16419
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-11.7 sec  17.4 MBytes  12.5 Mbits/sec
+
+```
+
 ## Results
 
 After creating the 50k images, the result of a `cURL -X GET` against `https://localhost:8443/oapi/v1/imagestreams` has a 66mb response body. The data, when compressed with gzip, shrinks to 1.12mb.
@@ -43,9 +57,14 @@ After creating the 50k images, the result of a `cURL -X GET` against `https://lo
 
 Note: Compressed size will vary depending on the actual data being compressed, as well as the compression algorithm being used. Less redundant data will not be as compressible.
 
-Response latency differed by an average of 11 minutes for each request:
+**Updated**: Response latency including TTFB compared with Total Time for requests. Averages of 10 retries shown below. Time in seconds.
 
-![](images/latency.png)
+| Latency       | Connect | Time to First Byte  | Total Time  |
+| ------------- |:-------:| :------------------:| :---------: |
+| Compressed    | 0.160   | 4.809               | 7.945       |
+| Uncompressed  | 0.280   | 5.887               | 97.679      |
+
+![](images/latency-ttfb.png)
 
 While average CPU usage was higher for `openshift` when returning compressed responses by an average of 1% compared with uncompressed:
 
